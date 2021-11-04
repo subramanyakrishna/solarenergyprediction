@@ -100,6 +100,13 @@ def home():
     # if current time is between given range then output is zero
     solarOutputPerhours = rotateArray(solarOutputPerhours, 24, 1)
     times = rotateArray(times, 24, 1)
+    # print(times)
+    # print(len(times))
+    # times = ['12AM', '1AM', '2AM', '3AM', '4AM', '5AM', '6AM', '7AM', '8AM', '9AM', '10AM',
+    #          '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM', '11PM', ]
+    # print(times)
+
+    print(len(times))
     if (hour >= 0 and hour <= 5) or (hour >= 18 and hour <= 24):
         return render_template('perday.html', currTimeprediction=0, solarOutputPerhours=solarOutputPerhours, time=times, solarOutputPerDay=round(solarOutputPerDay, 2), costsavings=costsavings, averageSolarEnergyPerHour=round(averageSolarEnergyPerHour, 2), co2=co2, city_name=city_name, lat=lat, long=long, endDate=endDate, co2NoOfTree=int(co2/21))
     X = list([X])
