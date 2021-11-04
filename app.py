@@ -15,6 +15,21 @@ app = Flask(__name__)
 API_KEY = '8beb38e482734df9bb81eb1e724aa3b9'
 
 
+def rotateArray(arr, n, d):
+    temp = []
+    i = 0
+    while (i < d):
+        temp.append(arr[i])
+        i = i + 1
+    i = 0
+    while (d < n):
+        arr[i] = arr[d]
+        i = i + 1
+        d = d + 1
+    arr[:] = arr[: i] + temp
+    return arr
+
+
 @app.route('/')
 def man():
     # this by itself selects template folder
@@ -83,9 +98,8 @@ def home():
     costsavings = round(5.73*averageSolarEnergyPerHour, 2)
     co2 = round(0.185*averageSolarEnergyPerHour, 2)
     # if current time is between given range then output is zero
-    solarOutputPerhours = solarOutputPerhours.insert(
-        23, solarOutputPerhours.pop(0))
-    times = times.insert(23, times.pop(0))
+    solarOutputPerhours = rotateArray(solarOutputPerhours, 24, 1)
+    times = rotateArray(times, 24, 1)
     if (hour >= 0 and hour <= 5) or (hour >= 18 and hour <= 24):
         return render_template('perday.html', currTimeprediction=0, solarOutputPerhours=solarOutputPerhours, time=times, solarOutputPerDay=round(solarOutputPerDay, 2), costsavings=costsavings, averageSolarEnergyPerHour=round(averageSolarEnergyPerHour, 2), co2=co2, city_name=city_name, lat=lat, long=long, endDate=endDate, co2NoOfTree=int(co2/21))
     X = list([X])
