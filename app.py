@@ -83,11 +83,12 @@ def home():
     costsavings = round(5.73*averageSolarEnergyPerHour, 2)
     co2 = round(0.185*averageSolarEnergyPerHour, 2)
     # if current time is between given range then output is zero
-
+    solarOutputPerhours = solarOutputPerhours.insert(
+        23, solarOutputPerhours.pop(0))
+    times = times.insert(23, times.pop(0))
     if (hour >= 0 and hour <= 5) or (hour >= 18 and hour <= 24):
         return render_template('perday.html', currTimeprediction=0, solarOutputPerhours=solarOutputPerhours, time=times, solarOutputPerDay=round(solarOutputPerDay, 2), costsavings=costsavings, averageSolarEnergyPerHour=round(averageSolarEnergyPerHour, 2), co2=co2, city_name=city_name, lat=lat, long=long, endDate=endDate, co2NoOfTree=int(co2/21))
     X = list([X])
-
     pred = round(model.predict(X)[0], 3)
     return render_template('perday.html', currTimeprediction=round(pred, 2), solarOutputPerhours=solarOutputPerhours, time=times, solarOutputPerDay=round(solarOutputPerDay, 2), costsavings=costsavings, averageSolarEnergyPerHour=round(averageSolarEnergyPerHour, 2), co2=round(co2, 2), city_name=city_name, lat=lat, long=long, endDate=endDate, co2NoOfTree=int(co2/21))
 
