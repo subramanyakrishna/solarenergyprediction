@@ -68,7 +68,6 @@ def getPerDayChart(lat, long, endDate, startDate, API_KEY):
 
 @app.route('/perday', methods=['POST'])
 def home():
-
     # get lat,lng,enddate from request
     lat = float(request.form['lat'])
     long = float(request.form['long'])
@@ -113,6 +112,45 @@ def monthlyRoute():
     long = float(request.args.get('long'))
     endDate = request.args.get('endDate')
     return monthly.monthlyData(lat, long, endDate, API_KEY)
+
+
+@app.route('/result', methods=['POST', 'GET'])
+def result():
+    lat = float(request.args.get('lat'))
+    long = float(request.args.get('long'))
+    endDate = request.args.get('endDate')
+    # get the current time in that location
+    hour = utils.getTime(lat, long)
+
+    endDate = date.fromisoformat(endDate)
+    # if selected date is more than todays date return error since we don't have data for that
+    if date.today() < endDate:
+        return {"response": "Please select date lesser than todays date since we can't get the future environmental condition to predict solar output", "mainpageUrl": "https://solaroutputprediction.herokuapp.com/"}
+    # check wherther api under limit
+    if(utils.checkLimitExceeded(API_KEY) == True):
+        return {"response": "Weatherbit API limit exceeded"}
+
+    startDate = (endDate-timedelta(days=1)).isoformat()
+
+    # get predited data to plot chart of solar energy production in diffent time in that day
+    solarOutputPerhours, times, solarOutputPerDay = getPerDayChart(
+        lat, long, endDate, startDate, API_KEY)
+
+    X, city_name = mainpage.getWeatherData(lat, long, hour, API_KEY)
+
+    X = utils.getCorrectUnit(X)
+
+    averageSolarEnergyPerHour = round(sum(solarOutputPerhours)/12, 2)
+    costsavings = round(5.73*averageSolarEnergyPerHour, 2)
+    co2 = round(0.185*averageSolarEnergyPerHour, 2)
+    # if current time is between given range then output is zero
+    solarOutputPerhours = rotateArray(solarOutputPerhours, 24, 1)
+    times = rotateArray(times, 24, 1)
+    if (hour >= 0 and hour <= 5) or (hour >= 18 and hour <= 24):
+        return {'currTimeprediction': 0, 'solarOutputPerhours': solarOutputPerhours, 'time': times, 'solarOutputPerDay': round(solarOutputPerDay, 2), 'costsavings': costsavings, 'averageSolarEnergyPerHour': round(averageSolarEnergyPerHour, 2), 'co2': co2, 'city_name': city_name, 'lat': lat, 'long': long, 'endDate': endDate, 'co2NoOfTree': int(co2/21)}
+    X = list([X])
+    pred = round(model.predict(X)[0], 3)
+    return {'currTimeprediction': round(pred, 2), 'solarOutputPerhours': solarOutputPerhours, 'time': times, 'solarOutputPerDay': round(solarOutputPerDay, 2), 'costsavings': costsavings, 'averageSolarEnergyPerHour': round(averageSolarEnergyPerHour, 2), 'co2': co2, 'city_name': city_name, 'lat': lat, 'long': long, 'endDate': endDate, 'co2NoOfTree': int(co2/21)}
 
 
 if(__name__ == "__main__"):
