@@ -14,6 +14,37 @@
   <title>Solar Energy Output Prediction</title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/perday.css') }}">
   </link>
+  <style>
+    .spin {
+      margin-top: 50vh;
+    }
+
+    @keyframes spinner {
+      0% {
+        transform: translate3d(-50%, -50%, 0) rotate(0deg);
+      }
+
+      100% {
+        transform: translate3d(-50%, -50%, 0) rotate(360deg);
+      }
+    }
+
+    .spin::before {
+      animation: 1.5s linear infinite spinner;
+      animation-play-state: inherit;
+      border: solid 5px #b3b4b4;
+      border-bottom-color: #1c87c9;
+      border-radius: 50%;
+      content: "";
+      height: 100px;
+      width: 100px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate3d(-50%, -50%, 0);
+      will-change: transform;
+    }
+  </style>
 </head>
 
 <body>
@@ -27,7 +58,13 @@
       </ul>
     </div>
   </nav>
-  <div style="padding: 20px">
+  <div style="width:100%; text-align: center; margin-top: 100px; font-weight: 500; font-size: xx-large; color:#001531;"
+    id='loadingDiv'>
+    Data is being
+    generated</div>
+  <div class="spin" id='spin'></div>
+
+  <div id="results" style="padding: 20px; display:none;">
     <h5 class="editsize"><u><b>Energy savings and Plots &#x26A1;</b></u></h5>
     <p> Below prediction are based on the assumption that, Total module Area: 36646.94 m<sup>2</sup>, Module tilt:
       20<sup>&#xb0;</sup>, Module orientation: 3-up landscape, Array Azimuth: 180<sup>&#xb0;</sup></p>
@@ -36,28 +73,32 @@
       <tbody>
         <tr>
           <td>The total solar energy output at current hour </td>
-          <td><b>{{currTimeprediction}} kW</b></td>
+          <!-- {{currTimeprediction}} kW -->
+          <td><b id='currTimeprediction'>kW</b></td>
         </tr>
         <tr>
           <td>The total solar energy output per day </td>
-          <td><b> {{solarOutputPerDay}} kW</b></td>
+          <!-- {{solarOutputPerDay}} kW -->
+          <td><b id='solarOutputPerDay'> </b></td>
         </tr>
         <tr>
           <td>Average solar energy per hour </td>
-          <td><b>{{averageSolarEnergyPerHour}} kWh</b></td>
+          <!-- {{averageSolarEnergyPerHour}} kWh -->
+          <td><b id='averageSolarEnergyPerHour'></b></td>
         </tr>
       </tbody>
     </table>
     <div style="width: 100%;" id="parentChart">
       <h6 style="text-align: center;">
-        The solar energy produced at different hours in a selected date(<b>{{endDate}}</b>) is plotted below
+        The solar energy produced at different hours in a selected date(<b id='endDate'>{{endDate}}</b>) is plotted
+        below
       </h6>
 
       <br>
       <canvas id="lineChartPerDay">
       </canvas>
       <h6 style="text-align: center;">
-        The solar energy produced 30 days before from the selected date(<b>{{endDate}}</b>)
+        The solar energy produced 30 days before from the selected date(<b id='endDate'>{{endDate}}</b>)
       </h6>
       <span id="loading" style="color:#084fac; text-align: center; margin: 0 auto;">Please wait while the plot is being
         generated..... </span>
@@ -72,11 +113,12 @@
       <tbody>
         <tr>
           <td>Average cost of Electricity per unit KWh </td>
-          <td><b>₹ {{5.43}}</b></td>
+          <td><b>₹5.43</b></td>
         </tr>
         <tr>
           <td>Average cost savings </td>
-          <td><b>₹ {{costsavings}} per hour</b></td>
+          <!-- ₹ {{costsavings}} per hour -->
+          <td><b id='costsavings'>₹ {{costsavings}} per hour</b></td>
         </tr>
       </tbody>
     </table>
@@ -91,11 +133,14 @@
         </tr>
         <tr>
           <td>No of trees required to absorb the co2 released by using fossil fuel</td>
-          <td><b>{{co2NoOfTree}}</b></td>
+          <!-- {{co2NoOfTree}} -->
+          <td><b id='co2NoOfTree'></b></td>
         </tr>
+
         <tr>
           <td>Total carbon emission that can be reduced </td>
-          <td><b>{{co2}} kg</b></td>
+          <!-- {{co2}} kg -->
+          <td><b id='co2'></b></td>
         </tr>
       </tbody>
     </table>
@@ -133,7 +178,8 @@
     <table>
       <tbody>
         <tr>
-          <td>Nearest services for solar panel installation in <b>{{city_name}}</b> </td>
+          <!-- {{city_name}} -->
+          <td>Nearest services for solar panel installation in <b id='city_name'></b> </td>
           <td>
             <b><a id="nearServiceAnchor" target="_blank" href=""><small>(click here to go services
                   website)</small></a></b>
@@ -143,15 +189,16 @@
     </table>
     <button onclick="download_csv_file()"> Download CSV </button>
     <br>
-
+    <!-- {{time}} -->
     <div style="display: none"> there will be errors in the below code because vscode can't recognice ginger 2 and tples
-      don't format If we format {{time}} will have space which will rise error</div>
+      don't format If we format {time} will have space which will rise error</div>
 
 
   </div>
   </div>
   <script src="{{ url_for('static', filename='javascript/perday.js')}}"></script>
   <script>
+
 
     function lineChartJsForDay(times, solarOutputPerhours) {
       time = ['12AM', '1AM', '2AM', '3AM', '4AM', '5AM', '6AM', '7AM', '8AM', '9AM', '10AM',
@@ -210,8 +257,28 @@
       });
     }
 
-    lineChartJsForDay({{ time }}, {{ solarOutputPerhours }});
 
+
+    const setDatavalue = (nameOfData, dataValue) => {
+      let dataHTML = document.getElementById(nameOfData);
+      dataHTML.innerHTML = dataValue
+    }
+    url = "/result?lat={{lat}}&long={{long}}&endDate={{endDate}}"
+    fetch(url).then((data) => data.json()).then((data) => {
+      console.log(data)
+      let results = document.getElementById('results')
+      let loadingDiv = document.getElementById('loadingDiv')
+      let spin = document.getElementById('spin')
+      loadingDiv.style['display'] = 'none'
+      spin.style['display'] = 'none'
+      results.style["display"] = "block"
+      const data_type_array = ['currTimeprediction', 'solarOutputPerDay', 'averageSolarEnergyPerHour', 'costsavings', 'co2NoOfTree', 'co2', 'city_name']
+      data_type_array.forEach((data_type) => {
+        console.log(data_type, data[data_type])
+        setDatavalue(data_type, data[data_type])
+      })
+      lineChartJsForDay(data['time'], data['solarOutputPerhours']);
+    }).catch((err) => console.log(err))
 
 
     var ct = document.getElementById('lineChartPerMonth').getContext('2d');
@@ -221,6 +288,7 @@
     url = "/monthly?lat={{lat}}&long={{long}}&endDate={{endDate}}" //replace with https:solaroutputprediction.herokuapp.com/
     var result = []
     var dates = []
+
     fetch(url).then((data) => data.json()).then((data) => {
       console.log(data);
       result = data["result"];
