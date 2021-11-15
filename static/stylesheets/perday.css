@@ -23,7 +23,8 @@ tr:nth-child(even) {
   margin: 0 auto !important;
 }
 #lineChartPerMonth,
-#lineChartPerDay {
+#lineChartPerDay,
+#lineChartForCast {
   border: 1.7px solid #dddddd;
   width: 70% !important;
   height: 70% !important;
@@ -35,7 +36,61 @@ tr:nth-child(even) {
   justify-content: center;
   align-items: center;
 }
+.spin {
+  margin-top: 50vh;
+}
 
+@keyframes spinner {
+  0% {
+    transform: translate3d(-50%, -50%, 0) rotate(0deg);
+  }
+
+  100% {
+    transform: translate3d(-50%, -50%, 0) rotate(360deg);
+  }
+}
+
+.spin::before {
+  animation: 1.5s linear infinite spinner;
+  animation-play-state: inherit;
+  border: solid 5px #b3b4b4;
+  border-bottom-color: #1c87c9;
+  border-radius: 50%;
+  content: "";
+  height: 100px;
+  width: 100px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate3d(-50%, -50%, 0);
+  will-change: transform;
+}
+.spinSmall {
+  margin-top: 50vh;
+}
+
+.spinSmaller::before {
+  animation: 1.5s linear infinite spinner;
+  animation-play-state: inherit;
+  border: solid 5px #b3b4b4;
+  border-bottom-color: #1c87c9;
+  border-radius: 50%;
+  content: "";
+  height: 50px;
+  width: 50px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate3d(-50%, -50%, 0);
+  will-change: transform;
+}
+#parentChartForeCast {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
 @media only screen and (max-width: 600px) {
   #lineChartPerMonth,
   #lineChartPerDay {

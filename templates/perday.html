@@ -14,37 +14,7 @@
   <title>Solar Energy Output Prediction</title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/perday.css') }}">
   </link>
-  <style>
-    .spin {
-      margin-top: 50vh;
-    }
 
-    @keyframes spinner {
-      0% {
-        transform: translate3d(-50%, -50%, 0) rotate(0deg);
-      }
-
-      100% {
-        transform: translate3d(-50%, -50%, 0) rotate(360deg);
-      }
-    }
-
-    .spin::before {
-      animation: 1.5s linear infinite spinner;
-      animation-play-state: inherit;
-      border: solid 5px #b3b4b4;
-      border-bottom-color: #1c87c9;
-      border-radius: 50%;
-      content: "";
-      height: 100px;
-      width: 100px;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate3d(-50%, -50%, 0);
-      will-change: transform;
-    }
-  </style>
 </head>
 
 <body>
@@ -104,6 +74,27 @@
         generated..... </span>
       <br>
       <canvas id="lineChartPerMonth">
+      </canvas>
+    </div>
+    <br>
+    <h5 class="editsize"><u><b>Solar Forecasting based on given Historical data &#65039;</b></u></h5>
+    <br>
+    <div class="row">
+      <div class="input-field col s12 l8">
+        <input id="forCastInputs" class="active" type="text" name="forCastInputs" value="" oninput="removeError()"
+          placeholder="Ex:1234.02 2178.45 5164.8 8916.76 1634.02 2124.40 2754.90 2134.46 1354.87 2451.67" />
+        <label for="forCastInputs">Please enter solar power generated 10 consecutive days with space inbetween in kW
+        </label>
+        <span id="errorForcast"></span>
+      </div>
+      <button type="submit" class="btn" onclick="onForecastValueSubmit()"
+        style="background-color:#001531">submit</button>
+
+    </div>
+    <div style="display: none; width: 100%;" id="parentChartForeCast">
+
+      <br>
+      <canvas id="lineChartForCast">
       </canvas>
     </div>
     <br>
@@ -173,7 +164,7 @@
       </div>
     </div>
     <br>
-    <h5 class="editsize"><u><b>Ready to get Started?</b></u></h5>
+    <h5 class="editsize"><u><b>Ready to get Started &#10067;</b></u></h5>
     <p>Find a solar provider in your area to get more information and begin discussing installation</p>
     <table>
       <tbody>
@@ -189,32 +180,72 @@
     </table>
     <button onclick="download_csv_file()"> Download CSV </button>
     <br>
-    <!-- {{time}} -->
-    <div style="display: none"> there will be errors in the below code because vscode can't recognice ginger 2 and tples
-      don't format If we format {time} will have space which will rise error</div>
 
 
   </div>
   </div>
   <script src="{{ url_for('static', filename='javascript/perday.js')}}"></script>
   <script>
+    function removeError() {
+      let error = document.getElementById('errorForcast')
+      error.innerHTML = ''
+    }
 
+    function onForecastValueSubmit() {
+      let forCastElement = document.getElementById('forCastInputs')
+      let forCastValueString = forCastElement.value.trim()
+      let forCastedValueSplittedToStrings = forCastValueString.split(/\s+/)
+      console.log('forCastedValueSplittedToStrings', forCastedValueSplittedToStrings)
+      let forCastedValueInFloat = forCastedValueSplittedToStrings.map((str) => Number(str))
+      console.log('forCastedValueInFloat', forCastedValueInFloat)
+      let error = document.getElementById('errorForcast')
+      if (forCastedValueInFloat.length != 10) {
+        error.innerHTML = `Please input solar energy produced in 10 days only,You have given ${forCastedValueInFloat.length} days value`;
+        error.style.color = "red";
+      }
+      fetch('/getForecast', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          'tenDaysOutputs': forCastedValueInFloat
+        })
+      }).then(data => data.json()).then((data) => {
+        let next3DaysOutput = data['next3DaysOutput']
+        let parentChartForeCast = document.getElementById('parentChartForeCast')
+        parentChartForeCast.style.display = 'flex'
+        lineChartJsForDay(['Day 11', 'Day 12', 'Day 13'], next3DaysOutput, 'Days', 'Solar Energy per day', 'Solar Energy Forecast', 'lineChartForCast', () => {
+          document.querySelector("#lineChartForCast").remove();
+          var link = document.createElement("canvas");
+          link.id = "lineChartForCast";
+          document.querySelector("#parentChartForeCast").appendChild(link);
+          canvas = document.querySelector("#lineChartForCast");
+          ctx = canvas.getContext("2d");
+        })
 
-    function lineChartJsForDay(times, solarOutputPerhours) {
-      time = ['12AM', '1AM', '2AM', '3AM', '4AM', '5AM', '6AM', '7AM', '8AM', '9AM', '10AM',
-        '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM', '11PM',]
+      }).catch((err) => {
+        console.log(err);
+        let error = document.getElementById('errorForcast')
+        error.innerHTML = `Error while getting forecast data`;
+        error.style.color = "red";
+      })
 
-      var ctx = document.getElementById("lineChartPerDay").getContext("2d");
+    }
+
+    function lineChartJsForDay(xValues, yValues, xLabel, yLabel, chartLabel, id, callback = () => { }) {
+      callback()
+      var ctx = document.getElementById(id).getContext("2d");
       ctx.innerHTML = "loading";
-      Chart.defaults.font.size = window.innerWidth > 600 ? 20 : 14;
+      Chart.defaults.font.size = 15;
       var lineChart = new Chart(ctx, {
         type: "line",
         data: {
-          labels: time,
+          labels: xValues,
           datasets: [
             {
-              label: "Solar Energy output per hour",
-              data: solarOutputPerhours,
+              label: chartLabel,
+              data: yValues,
               fill: false,
               borderColor: "rgb(75,193,192)",
               lineTension: 0,
@@ -233,7 +264,7 @@
             y: {
               title: {
                 display: true,
-                text: "Solar Energy Per hour",
+                text: yLabel,
                 color: "rgb(75,192,192)",
                 align: "center",
               },
@@ -244,7 +275,7 @@
             x: {
               title: {
                 display: true,
-                text: "hours in a day",
+                text: xLabel,
                 color: "rgb(75,192,192)",
                 align: "center",
               },
@@ -263,6 +294,7 @@
       let dataHTML = document.getElementById(nameOfData);
       dataHTML.innerHTML = dataValue
     }
+
     url = "/result?lat={{lat}}&long={{long}}&endDate={{endDate}}"
     fetch(url).then((data) => data.json()).then((data) => {
       console.log(data)
@@ -277,85 +309,34 @@
         console.log(data_type, data[data_type])
         setDatavalue(data_type, data[data_type])
       })
-      lineChartJsForDay(data['time'], data['solarOutputPerhours']);
+      time = ['12AM', '1AM', '2AM', '3AM', '4AM', '5AM', '6AM', '7AM', '8AM', '9AM', '10AM',
+        '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM', '11PM',]
+
+      lineChartJsForDay(time, data['solarOutputPerhours'], "hours in a day", "Solar Energy Per hour", "Solar Energy output per hour", 'lineChartPerDay');
     }).catch((err) => console.log(err))
 
 
-    var ct = document.getElementById('lineChartPerMonth').getContext('2d');
-    var lineChar = new Chart(ct, {})
 
-    Chart.defaults.font.size = window.innerWidth > 600 ? 20 : 14;
-    url = "/monthly?lat={{lat}}&long={{long}}&endDate={{endDate}}" //replace with https:solaroutputprediction.herokuapp.com/
-    var result = []
-    var dates = []
+    Chart.defaults.font.size = 15;
 
-    fetch(url).then((data) => data.json()).then((data) => {
+    fetch("/monthly?lat={{lat}}&long={{long}}&endDate={{endDate}}").then((data) => data.json()).then((data) => {
+      var result = []
+      var dates = []
       console.log(data);
       result = data["result"];
       dates = data["dates"]
       console.log(result)
       console.log(dates)
       document.getElementById("loading").innerHTML = ""
-      renderTheLineChartForMonth(result, dates);
+      lineChartJsForDay(dates, result, 'Dates', 'Solar Energy per day', 'Solar Energy output per day', 'lineChartPerMonth', () => {
+        document.querySelector("#lineChartPerMonth").remove();
+        var link = document.createElement("canvas");
+        link.id = "lineChartPerMonth";
+        document.querySelector("#parentChart").appendChild(link);
+        canvas = document.querySelector("#lineChartPerMonth");
+        ctx = canvas.getContext("2d");
+      })
     })
-    function renderTheLineChartForMonth(result, dates) {
-
-      document.querySelector("#lineChartPerMonth").remove();
-      var link = document.createElement("canvas");
-      link.id = "lineChartPerMonth";
-      document.querySelector("#parentChart").appendChild(link);
-      canvas = document.querySelector("#lineChartPerMonth");
-      ctx = canvas.getContext("2d");
-      var lineChart = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: dates,
-          datasets: [
-            {
-              label: "Solar Energy output per day",
-              data: result,
-              fill: false,
-              borderColor: "rgb(75,193,192)",
-              lineTension: 0,
-              pointRadius: 0,
-              hoverPointRadius: 1,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          interaction: {
-            intersect: false,
-            axis: 'x'
-          },
-          scales: {
-            y: {
-              title: {
-                display: true,
-                text: "Solar Energy Per Day",
-                color: "rgb(75,192,192)",
-                align: "center",
-              },
-              grid: {
-                display: false
-              }
-            },
-            x: {
-              title: {
-                display: true,
-                text: "Dates",
-                color: "rgb(75,192,192)",
-                align: "center",
-              },
-              grid: {
-                display: false
-              }
-            },
-          },
-        },
-      });
-    }
-
 
   </script>
   <script>

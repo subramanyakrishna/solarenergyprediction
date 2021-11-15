@@ -4,6 +4,21 @@ import sys
 # returns after correcting the unit to match data used to train gbr model
 
 
+def rotateArray(arr, n, d):
+    temp = []
+    i = 0
+    while (i < d):
+        temp.append(arr[i])
+        i = i + 1
+    i = 0
+    while (d < n):
+        arr[i] = arr[d]
+        i = i + 1
+        d = d + 1
+    arr[:] = arr[: i] + temp
+    return arr
+
+
 def getCorrectUnitPerDay(X):
     X[1] = X[1]/100
     X[2] = 0.621371 * X[2]  # 0.621371
@@ -47,3 +62,7 @@ def checkLimitExceeded(API_KEY):
     urlWeatherBit = "https://api.weatherbit.io/v2.0/history/hourly?lat=23&lon=70&start_date=2021-05-23&end_date=2021-05-24&tz=local&key="+API_KEY
     res = request("GET", urlWeatherBit)
     return (res.status_code == 429) or (res.status_code == 403)
+
+
+def getReverseMinMaxvalue(minMaxedValue, min, max):
+    return minMaxedValue * (max-min) + min

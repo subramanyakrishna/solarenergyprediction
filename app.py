@@ -1,33 +1,23 @@
-import sys
+from sklearn.preprocessing import MinMaxScaler
 from datetime import date, timedelta
 import mainpage
 import perday
-import monthly
+import numpy as np
+from monthly import monthlyData
+from tensorflow.keras.models import load_model
 import utils
 from flask import Flask, render_template, request
 from pickle import load
-model = load(open('gbr1.pkl', 'rb'))
 
+gbrModel = load(open('gbr1.pkl', 'rb'))
+forecastingModel = load_model('forecasting_model')
+
+scaler = MinMaxScaler(feature_range=(0, 1))
 
 app = Flask(__name__)
 
 # render main page
 API_KEY = '8beb38e482734df9bb81eb1e724aa3b9'
-
-
-def rotateArray(arr, n, d):
-    temp = []
-    i = 0
-    while (i < d):
-        temp.append(arr[i])
-        i = i + 1
-    i = 0
-    while (d < n):
-        arr[i] = arr[d]
-        i = i + 1
-        d = d + 1
-    arr[:] = arr[: i] + temp
-    return arr
 
 
 @app.route('/')
@@ -57,7 +47,7 @@ def getPerDayChart(lat, long, endDate, startDate, API_KEY):
             continue
         time.append(X[0])
         X = list([X])
-        pred = model.predict(X)
+        pred = gbrModel.predict(X)
         solarOutputPerhours.append(pred[0])
         X = []
     solarOutputPerDay = sum(solarOutputPerhours)
@@ -74,46 +64,13 @@ def home():
     endDate = request.form['endDate']
     return render_template('perday.html', lat=lat, long=long, endDate=endDate)
 
-    # # get the current time in that location
-    # hour = utils.getTime(lat, long)
-
-    # endDate = date.fromisoformat(endDate)
-    # # if selected date is more than todays date return error since we don't have data for that
-    # if date.today() < endDate:
-    #     return {"response": "Please select date lesser than todays date since we can't get the future environmental condition to predict solar output", "mainpageUrl": "https://solaroutputprediction.herokuapp.com/"}
-    # # check wherther api under limit
-    # if(utils.checkLimitExceeded(API_KEY) == True):
-    #     return {"response": "Weatherbit API limit exceeded"}
-
-    # startDate = (endDate-timedelta(days=1)).isoformat()
-
-    # # get predited data to plot chart of solar energy production in diffent time in that day
-    # solarOutputPerhours, times, solarOutputPerDay = getPerDayChart(
-    #     lat, long, endDate, startDate, API_KEY)
-
-    # X, city_name = mainpage.getWeatherData(lat, long, hour, API_KEY)
-
-    # X = utils.getCorrectUnit(X)
-
-    # averageSolarEnergyPerHour = round(sum(solarOutputPerhours)/12, 2)
-    # costsavings = round(5.73*averageSolarEnergyPerHour, 2)
-    # co2 = round(0.185*averageSolarEnergyPerHour, 2)
-    # # if current time is between given range then output is zero
-    # solarOutputPerhours = rotateArray(solarOutputPerhours, 24, 1)
-    # times = rotateArray(times, 24, 1)
-    # if (hour >= 0 and hour <= 5) or (hour >= 18 and hour <= 24):
-    #     return render_template('perday.html', currTimeprediction=0, solarOutputPerhours=solarOutputPerhours, time=times, solarOutputPerDay=round(solarOutputPerDay, 2), costsavings=costsavings, averageSolarEnergyPerHour=round(averageSolarEnergyPerHour, 2), co2=co2, city_name=city_name, lat=lat, long=long, endDate=endDate, co2NoOfTree=int(co2/21))
-    # X = list([X])
-    # pred = round(model.predict(X)[0], 3)
-    # return render_template('perday.html', currTimeprediction=round(pred, 2), solarOutputPerhours=solarOutputPerhours, time=times, solarOutputPerDay=round(solarOutputPerDay, 2), costsavings=costsavings, averageSolarEnergyPerHour=round(averageSolarEnergyPerHour, 2), co2=round(co2, 2), city_name=city_name, lat=lat, long=long, endDate=endDate, co2NoOfTree=int(co2/21))
-
 
 @app.route('/monthly', methods=['POST', 'GET'])
 def monthlyRoute():
     lat = float(request.args.get('lat'))
     long = float(request.args.get('long'))
     endDate = request.args.get('endDate')
-    return monthly.monthlyData(lat, long, endDate, API_KEY)
+    return monthlyData(lat, long, endDate, API_KEY)
 
 
 @app.route('/result', methods=['POST', 'GET'])
@@ -146,13 +103,39 @@ def result():
     costsavings = round(5.73*averageSolarEnergyPerHour, 2)
     co2 = round(0.185*averageSolarEnergyPerHour, 2)
     # if current time is between given range then output is zero
-    solarOutputPerhours = rotateArray(solarOutputPerhours, 24, 1)
-    times = rotateArray(times, 24, 1)
+    solarOutputPerhours = utils.rotateArray(solarOutputPerhours, 24, 1)
+    times = utils.rotateArray(times, 24, 1)
+    print({'currTimeprediction': '0  kW', 'solarOutputPerhours': solarOutputPerhours, 'time': times, 'solarOutputPerDay': '{}  kW'.format(round(solarOutputPerDay, 2)), 'costsavings': '₹ {} per hour'.format(costsavings),
+          'averageSolarEnergyPerHour': '{} kWh'.format(round(averageSolarEnergyPerHour, 2)), 'co2': '{}  kg'.format(co2), 'city_name': city_name, 'lat': lat, 'long': long, 'endDate': endDate, 'co2NoOfTree': int(co2/21)})
     if (hour >= 0 and hour <= 5) or (hour >= 18 and hour <= 24):
         return {'currTimeprediction': '0  kW', 'solarOutputPerhours': solarOutputPerhours, 'time': times, 'solarOutputPerDay': '{}  kW'.format(round(solarOutputPerDay, 2)), 'costsavings': '₹ {} per hour'.format(costsavings), 'averageSolarEnergyPerHour': '{} kWh'.format(round(averageSolarEnergyPerHour, 2)), 'co2': '{}  kg'.format(co2), 'city_name': city_name, 'lat': lat, 'long': long, 'endDate': endDate, 'co2NoOfTree': int(co2/21)}
     X = list([X])
-    pred = round(model.predict(X)[0], 3)
+    pred = round(gbrModel.predict(X)[0], 3)
     return {'currTimeprediction': round(pred, 2), 'solarOutputPerhours': solarOutputPerhours, 'time': times, 'solarOutputPerDay': '{}  kW'.format(round(solarOutputPerDay, 2)), 'costsavings': '₹ {} per hour'.format(costsavings), 'averageSolarEnergyPerHour': '{} kWh'.format(round(averageSolarEnergyPerHour, 2)), 'co2': '{}  kg'.format(co2), 'city_name': city_name, 'lat': lat, 'long': long, 'endDate': endDate, 'co2NoOfTree': int(co2/21)}
+
+
+@app.route('/getForecast', methods=['POST'])
+def get_forcast():
+    request_body = request.get_json()
+    tenDayaOutputFromApi = request_body['tenDaysOutputs']
+    max_value = max(tenDayaOutputFromApi)
+    min_value = min(tenDayaOutputFromApi)
+    transformedInputs = scaler.fit_transform(
+        np.array(tenDayaOutputFromApi).reshape(-1, 1))
+    tenDaySolarOutput = transformedInputs.reshape(1, 10, 1)
+    next3DaysOutput = []
+    for i in range(0, 3):
+        pre = forecastingModel.predict(tenDaySolarOutput)
+        # 8th day is added for next prediction
+        tenDaySolarOutput = np.append(tenDaySolarOutput, pre[0][0])
+        tenDaySolarOutput = tenDaySolarOutput[1:]  # first day is removed
+        tenDaySolarOutput = tenDaySolarOutput.reshape(1, 10, 1)
+
+        next3DaysOutput.append(tenDaySolarOutput[0][9][0])
+    next3DaysOutput = [round(utils.getReverseMinMaxvalue(
+        dayOutput, min_value, max_value), 2) for dayOutput in next3DaysOutput]
+
+    return {'next3DaysOutput': next3DaysOutput}
 
 
 if(__name__ == "__main__"):
