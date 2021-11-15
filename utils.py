@@ -62,7 +62,3 @@ def checkLimitExceeded(API_KEY):
     urlWeatherBit = "https://api.weatherbit.io/v2.0/history/hourly?lat=23&lon=70&start_date=2021-05-23&end_date=2021-05-24&tz=local&key="+API_KEY
     res = request("GET", urlWeatherBit)
     return (res.status_code == 429) or (res.status_code == 403)
-
-
-def getReverseMinMaxvalue(minMaxedValue, min, max):
-    return minMaxedValue * (max-min) + min
