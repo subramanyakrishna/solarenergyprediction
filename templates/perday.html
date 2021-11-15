@@ -203,7 +203,7 @@
         error.innerHTML = `Please input solar energy produced in 10 days only,You have given ${forCastedValueInFloat.length} days value`;
         error.style.color = "red";
       }
-      fetch('/getForecast', {
+      fetch('https://flaskforecast.herokuapp.com/getForecast', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

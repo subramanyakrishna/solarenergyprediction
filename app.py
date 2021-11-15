@@ -1,18 +1,14 @@
-from sklearn.preprocessing import MinMaxScaler
 from datetime import date, timedelta
 import mainpage
 import perday
 import numpy as np
 from monthly import monthlyData
-from tensorflow.keras.models import load_model
 import utils
 from flask import Flask, render_template, request
 from pickle import load
 
 gbrModel = load(open('gbr1.pkl', 'rb'))
-forecastingModel = load_model('forecasting_model')
 
-scaler = MinMaxScaler(feature_range=(0, 1))
 
 app = Flask(__name__)
 
@@ -112,31 +108,6 @@ def result():
     X = list([X])
     pred = round(gbrModel.predict(X)[0], 3)
     return {'currTimeprediction': round(pred, 2), 'solarOutputPerhours': solarOutputPerhours, 'time': times, 'solarOutputPerDay': '{}  kW'.format(round(solarOutputPerDay, 2)), 'costsavings': '₹ {} per hour'.format(costsavings), 'averageSolarEnergyPerHour': '{} kWh'.format(round(averageSolarEnergyPerHour, 2)), 'co2': '{}  kg'.format(co2), 'city_name': city_name, 'lat': lat, 'long': long, 'endDate': endDate, 'co2NoOfTree': int(co2/21)}
-
-
-@app.route('/getForecast', methods=['POST'])
-def get_forcast():
-    request_body = request.get_json()
-    tenDayaOutputFromApi = request_body['tenDaysOutputs']
-    max_value = max(tenDayaOutputFromApi)
-    min_value = min(tenDayaOutputFromApi)
-    transformedInputs = scaler.fit_transform(
-        np.array(tenDayaOutputFromApi).reshape(-1, 1))
-    tenDaySolarOutput = transformedInputs.reshape(1, 10, 1)
-    next3DaysOutput = []
-    for i in range(0, 3):
-        pre = forecastingModel.predict(tenDaySolarOutput)
-        # 8th day is added for next prediction
-        tenDaySolarOutput = np.append(tenDaySolarOutput, pre[0][0])
-        tenDaySolarOutput = tenDaySolarOutput[1:]  # first day is removed
-        tenDaySolarOutput = tenDaySolarOutput.reshape(1, 10, 1)
-
-        next3DaysOutput.append(tenDaySolarOutput[0][9][0])
-    next3DaysOutput = [round(utils.getReverseMinMaxvalue(
-        dayOutput, min_value, max_value), 2) for dayOutput in next3DaysOutput]
-
-    return {'next3DaysOutput': next3DaysOutput}
-
 
 if(__name__ == "__main__"):
     app.run(debug=True)
