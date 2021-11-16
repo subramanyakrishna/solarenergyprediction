@@ -345,7 +345,7 @@
         canvas = document.querySelector("#lineChartPerMonth");
         ctx = canvas.getContext("2d");
       })
-      let forCastedValueInFloat = result.slice(0, 10)
+      let forCastedValueInFloat = result.slice(0, 10).map((num) => Number(num))
       document.getElementById('forCastInputs').value = forCastedValueInFloat.join(" ")
       plotTheForeCast(forCastedValueInFloat)
     })
