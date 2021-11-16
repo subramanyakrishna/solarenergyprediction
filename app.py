@@ -109,5 +109,6 @@ def result():
     pred = round(gbrModel.predict(X)[0], 3)
     return {'currTimeprediction': round(pred, 2), 'solarOutputPerhours': solarOutputPerhours, 'time': times, 'solarOutputPerDay': '{}  kW'.format(round(solarOutputPerDay, 2)), 'costsavings': '₹ {} per hour'.format(costsavings), 'averageSolarEnergyPerHour': '{} kWh'.format(round(averageSolarEnergyPerHour, 2)), 'co2': '{}  kg'.format(co2), 'city_name': city_name, 'lat': lat, 'long': long, 'endDate': endDate, 'co2NoOfTree': int(co2/21)}
 
+
 if(__name__ == "__main__"):
     app.run(debug=True)

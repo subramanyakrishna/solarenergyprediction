@@ -204,6 +204,13 @@
         error.innerHTML = `Please input solar energy produced in 10 days only,You have given ${forCastedValueInFloat.length} days value`;
         error.style.color = "red";
       }
+      else {
+        plotTheForeCast(forCastedValueInFloat)
+      }
+
+    }
+
+    function plotTheForeCast(forCastedValueInFloat) {
       fetch('https://flaskforecast.herokuapp.com/getForecast', {
         method: 'POST',
         headers: {
@@ -231,7 +238,6 @@
         error.innerHTML = `Error while getting forecast data`;
         error.style.color = "red";
       })
-
     }
 
     function lineChartJsForDay(xValues, yValues, xLabel, yLabel, chartLabel, id, callback = () => { }) {
@@ -310,6 +316,8 @@
         console.log(data_type, data[data_type])
         setDatavalue(data_type, data[data_type])
       })
+
+      document.getElementById("nearServiceAnchor").href = `https://dir.indiamart.com/search.mp?ss=solar+panel+installation&cq=${data['city_name']}`;
       time = ['12AM', '1AM', '2AM', '3AM', '4AM', '5AM', '6AM', '7AM', '8AM', '9AM', '10AM',
         '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM', '11PM',]
 
@@ -337,6 +345,9 @@
         canvas = document.querySelector("#lineChartPerMonth");
         ctx = canvas.getContext("2d");
       })
+      let forCastedValueInFloat = result.slice(0, 10)
+      document.getElementById('forCastInputs').value = forCastedValueInFloat.join(" ")
+      plotTheForeCast(forCastedValueInFloat)
     })
 
   </script>
@@ -380,11 +391,7 @@
     }
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  <script>
-    window.onload = function addhref() {
-      document.getElementById("nearServiceAnchor").href = "https://dir.indiamart.com/search.mp?ss=solar+panel+installation&cq={{city_name}}";
-    }
-  </script>
+
 
 </body>
 
