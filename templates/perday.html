@@ -77,7 +77,7 @@
       </canvas>
     </div>
     <br>
-    <h5 class="editsize"><u><b>Solar Forecasting based on given Historical data &#65039;</b></u></h5>
+    <h5 class="editsize"><u><b>Solar Forecasting based on given Historical data ☀️</b></u></h5>
     <br>
     <div class="row">
       <div class="input-field col s12 l8">
@@ -192,6 +192,7 @@
     }
 
     function onForecastValueSubmit() {
+      removeError()
       let forCastElement = document.getElementById('forCastInputs')
       let forCastValueString = forCastElement.value.trim()
       let forCastedValueSplittedToStrings = forCastValueString.split(/\s+/)
