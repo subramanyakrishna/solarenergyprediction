@@ -20,8 +20,8 @@ function onfocusSubmit() {
           spanCity.innerHTML = "";
           lat = data["results"][0]["geometry"]["lat"];
           lng = data["results"][0]["geometry"]["lng"];
-          document.getElementById("lat").value = lat;
-          document.getElementById("long").value = lng;
+          document.getElementById("lat").value = lat.toFixed(4);
+          document.getElementById("long").value = lng.toFixed(4);
           mymap.flyTo([lat, lng], 13);
         }
       });

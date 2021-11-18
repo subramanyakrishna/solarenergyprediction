@@ -101,8 +101,6 @@ def result():
     # if current time is between given range then output is zero
     solarOutputPerhours = utils.rotateArray(solarOutputPerhours, 24, 1)
     times = utils.rotateArray(times, 24, 1)
-    print({'currTimeprediction': '0  kW', 'solarOutputPerhours': solarOutputPerhours, 'time': times, 'solarOutputPerDay': '{}  kW'.format(round(solarOutputPerDay, 2)), 'costsavings': '₹ {} per hour'.format(costsavings),
-          'averageSolarEnergyPerHour': '{} kWh'.format(round(averageSolarEnergyPerHour, 2)), 'co2': '{}  kg'.format(co2), 'city_name': city_name, 'lat': lat, 'long': long, 'endDate': endDate, 'co2NoOfTree': int(co2/21)})
     if (hour >= 0 and hour <= 5) or (hour >= 18 and hour <= 24):
         return {'currTimeprediction': '0  kW', 'solarOutputPerhours': solarOutputPerhours, 'time': times, 'solarOutputPerDay': '{}  kW'.format(round(solarOutputPerDay, 2)), 'costsavings': '₹ {} per hour'.format(costsavings), 'averageSolarEnergyPerHour': '{} kWh'.format(round(averageSolarEnergyPerHour, 2)), 'co2': '{}  kg'.format(co2), 'city_name': city_name, 'lat': lat, 'long': long, 'endDate': endDate, 'co2NoOfTree': int(co2/21)}
     X = list([X])

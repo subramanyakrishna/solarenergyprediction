@@ -56,7 +56,7 @@
           <label for="long">longitude </label>
         </div>
         <div class="row">
-          <div class="input-field col s12 l6">
+          <div class="input-field col s12 l6" style="margin-left: 10px;">
             <input type="date" id="endDate" name="endDate" min="1980-01-01" onchange="checkDate()">
             <label for="endDate">date</label>
             <span id="errorDate"></span>
@@ -89,8 +89,8 @@
         .setLatLng(e.latlng)
         .setContent(e.latlng.toString())
         .openOn(mymap);
-      var lat = e.latlng.lat
-      var long = e.latlng.lng
+      var lat = e.latlng.lat.toFixed(4)
+      var long = e.latlng.lng.toFixed(4)
       var latinput = document.getElementById('lat');
       var longinput = document.getElementById("long");
       latinput.value = lat;
