@@ -355,7 +355,8 @@
     function onElectricityUnitChange() {
       var electrocityUnit = document.getElementById("electrocityUnit").value;
       console.log(electrocityUnit)
-      document.getElementById("electrocityUnitAns").value = electrocityUnit / 225
+      let area = electrocityUnit / 225
+      document.getElementById("electrocityUnitAns").value = area.toFixed(2)
     }
   </script>
   <script id="forCSVExportData">
