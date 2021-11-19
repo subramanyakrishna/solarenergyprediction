@@ -102,10 +102,10 @@ def result():
     solarOutputPerhours = utils.rotateArray(solarOutputPerhours, 24, 1)
     times = utils.rotateArray(times, 24, 1)
     if (hour >= 0 and hour <= 5) or (hour >= 18 and hour <= 24):
-        return {'currTimeprediction': '0  kW', 'solarOutputPerhours': solarOutputPerhours, 'time': times, 'solarOutputPerDay': '{}  kW'.format(round(solarOutputPerDay, 2)), 'costsavings': '₹ {} per hour'.format(costsavings), 'averageSolarEnergyPerHour': '{} kWh'.format(round(averageSolarEnergyPerHour, 2)), 'co2': '{}  kg'.format(co2), 'city_name': city_name, 'lat': lat, 'long': long, 'endDate': endDate, 'co2NoOfTree': int(co2/21)}
+        return {'currTimeprediction': '0  kWh', 'solarOutputPerhours': solarOutputPerhours, 'time': times, 'solarOutputPerDay': '{}  kWh'.format(round(solarOutputPerDay, 2)), 'costsavings': '₹ {} per hour'.format(costsavings), 'averageSolarEnergyPerHour': '{} kWh'.format(round(averageSolarEnergyPerHour, 2)), 'co2': '{}  kg'.format(co2), 'city_name': city_name, 'lat': lat, 'long': long, 'endDate': endDate, 'co2NoOfTree': int(co2/21)}
     X = list([X])
     pred = round(gbrModel.predict(X)[0], 3)
-    return {'currTimeprediction': round(pred, 2), 'solarOutputPerhours': solarOutputPerhours, 'time': times, 'solarOutputPerDay': '{}  kW'.format(round(solarOutputPerDay, 2)), 'costsavings': '₹ {} per hour'.format(costsavings), 'averageSolarEnergyPerHour': '{} kWh'.format(round(averageSolarEnergyPerHour, 2)), 'co2': '{}  kg'.format(co2), 'city_name': city_name, 'lat': lat, 'long': long, 'endDate': endDate, 'co2NoOfTree': int(co2/21)}
+    return {'currTimeprediction': '{} kWh'.format(round(pred, 2)), 'solarOutputPerhours': solarOutputPerhours, 'time': times, 'solarOutputPerDay': '{}  kWh'.format(round(solarOutputPerDay, 2)), 'costsavings': '₹ {} per hour'.format(costsavings), 'averageSolarEnergyPerHour': '{} kWh'.format(round(averageSolarEnergyPerHour, 2)), 'co2': '{}  kg'.format(co2), 'city_name': city_name, 'lat': lat, 'long': long, 'endDate': endDate, 'co2NoOfTree': int(co2/21)}
 
 
 if(__name__ == "__main__"):
