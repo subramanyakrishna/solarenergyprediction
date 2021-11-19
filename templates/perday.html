@@ -322,9 +322,57 @@
         '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM', '11PM',]
 
       lineChartJsForDay(time, data['solarOutputPerhours'], "hours in a day", "Solar Energy Per hour", "Solar Energy output per hour", 'lineChartPerDay');
+      const downLoadDataTypeArray = ['currTimeprediction', 'city_name', 'co2', 'costsavings', 'averageSolarEnergyPerHour', 'solarOutputPerDay']
+      downLoadDataTypeArray.forEach((data_type) => {
+        console.log(data_type, data[data_type])
+        setLocalStrorage(data_type, data[data_type])
+      })
     }).catch((err) => console.log(err))
 
 
+
+    function setLocalStrorage(data_type, data) {
+      localStorage.setItem(data_type, data.toString())
+    }
+    function getLocalStorage(data_type) {
+      return localStorage.getItem(data_type)
+    }
+    function download_csv_file() {
+      const data = [];
+      const downLoadDataTypeArray = ['currTimeprediction', 'city_name', 'co2', 'costsavings', 'averageSolarEnergyPerHour', 'solarOutputPerDay']
+      downLoadDataTypeArray.forEach((data_type) => {
+        console.log(data_type, data[data_type])
+        data[data_type] = getLocalStorage(data_type)
+      })
+      var csvFileData = [
+        ['The total solar energy output at current hour', `${data['currTimeprediction']} kw`],
+        ['The total solar energy output per day ', `${data['solarOutputPerDay']} `],
+        ['Average solar energy per hour ', `${data['averageSolarEnergyPerHour']} `],
+        ['Average cost savings', `Rs ${data['costsavings']}`],
+        ['Total carbon emission due to Combustion of Natural gas', '0.185 kg/KWh'],
+        ['Total carbon emission that can be reduced', `${data['co2']}`],
+        [`Nearest services for solar panel installation in ${data['city_name']}`, `https://dir.indiamart.com/search.mp?ss=solar+panel+installation&cq=${data['city_name']}`],
+        ['Government Incentives & Schemes', 'https://mnre.gov.in/solar/schemes']
+      ];
+      //define the heading for each row of the data  
+      var csv = 'Analysis,Results\n';
+
+      //merge the data with CSV  
+      csvFileData.forEach((row) => {
+        csv += row.join(',');
+        csv += "\n";
+      });
+
+
+
+      var hiddenElement = document.createElement('a');
+      hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+      hiddenElement.target = '_blank';
+
+      //provide the name for the CSV file to be downloaded
+      hiddenElement.download = 'solarEnergyData.csv';
+      hiddenElement.click();
+    }
 
     Chart.defaults.font.size = 15;
 
@@ -359,38 +407,7 @@
       document.getElementById("electrocityUnitAns").value = area.toFixed(2)
     }
   </script>
-  <script id="forCSVExportData">
-    var csvFileData = [
-      ['The total solar energy output at current hour', '{{currTimeprediction}} kw'],
-      ['The total solar energy output per day ', '{{solarOutputPerDay}} kw'],
-      ['Average solar energy per hour ', '{{averageSolarEnergyPerHour}} kwh'],
-      ['Average cost savings', 'Rs {{costsavings}} per hour'],
-      ['Total carbon emission due to Combustion of Natural gas', '0.185 kg/KWh'],
-      ['Total carbon emission that can be reduced', '{{co2}} kg'],
-      ['Nearest services for solar panel installation in {{city_name}}', 'https://dir.indiamart.com/search.mp?ss=solar+panel+installation&cq={{city_name}}']
-    ];
-    function download_csv_file() {
 
-      //define the heading for each row of the data  
-      var csv = 'Analysis,Results\n';
-
-      //merge the data with CSV  
-      csvFileData.forEach((row) => {
-        csv += row.join(',');
-        csv += "\n";
-      });
-
-
-
-      var hiddenElement = document.createElement('a');
-      hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-      hiddenElement.target = '_blank';
-
-      //provide the name for the CSV file to be downloaded
-      hiddenElement.download = 'solarEnergyData.csv';
-      hiddenElement.click();
-    }
-  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
 
