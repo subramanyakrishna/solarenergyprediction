@@ -6,14 +6,15 @@ from monthly import monthlyData
 import utils
 from flask import Flask, render_template, request
 from pickle import load
-
+from random import choice
 gbrModel = load(open('gbr1.pkl', 'rb'))
 
 
 app = Flask(__name__)
 
 # render main page
-API_KEY = '8beb38e482734df9bb81eb1e724aa3b9'
+API_KEY = choice(['8beb38e482734df9bb81eb1e724aa3b9',
+                 'dfdad03e8a3440d190ff52602a1739fb'])
 
 
 @app.route('/')
