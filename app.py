@@ -13,8 +13,7 @@ gbrModel = load(open('gbr1.pkl', 'rb'))
 app = Flask(__name__)
 
 # render main page
-API_KEY = choice(['8beb38e482734df9bb81eb1e724aa3b9',
-                 'dfdad03e8a3440d190ff52602a1739fb'])
+API_KEY = choice(['b25f23d7ae94491283be235ed8b0f074'])
 
 
 @app.route('/')
